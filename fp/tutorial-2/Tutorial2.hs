@@ -60,8 +60,11 @@ prop_totalScore_pos xs = undefined
 -- 5. crosswordFind
 
 crosswordFind :: Char -> Int -> Int -> [String] -> [String]
-crosswordFind letter pos len words = [word | word <- words, length word == len && word !! pos == letter]
+crosswordFind letter pos len words = [word | word <- words, pos >= 0 && pos <= (length word -1 ) && length word == len && word !! pos == letter]
 
+
+prop_crosswordFind :: Char -> Int -> Int -> [String] -> Bool
+prop_crosswordFind letter pos len words = crosswordFind letter pos len words == [word | word <- words, pos >= 0 && pos <= (length word -1 ) && length word == len && word !! pos == letter]
 
 -- 6. search
 
