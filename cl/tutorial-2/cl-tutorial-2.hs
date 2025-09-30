@@ -53,6 +53,16 @@ isSquare x = x `elem` [A,B,D,E]
 isBig x = x `elem` [A,B,C,D]
 hasOutline x = x `elem` [A,C,D,E]
 
+-- Adding the opposite ones here..
+isBlue :: Predicate Thing
+isCircle :: Predicate Thing
+isSmall :: Predicate Thing
+noHasOutline :: Predicate Thing
+isBlue x = not (isOrange x)
+isCircle x = not (isSquare x)
+isSmall x = not (isBig x)
+noHasOutline x = not (hasOutline x)
+
 ----------------
 -- Exercise 4
 statement1 :: Bool
@@ -67,12 +77,34 @@ statement2 = or [not (isBig thing) | thing <- things, not (isSquare thing) && is
 ------------
 -- Exercise 5
 
-isBlue :: Predicate Thing
-isBlue x = not (isOrange x)
-
 firstStatement :: Bool
 firstStatement = not (or [isBlue thing | thing <- things, isSquare thing])
 
 secondStatement :: Bool
 secondStatement = and [not (isBlue thing) | thing <- things, isSquare thing]
 
+
+-------------
+-- Exercise 6
+
+thingsOtherThan :: Thing -> [Thing]
+thingsOtherThan thing = [x | x <- things, x /= thing]
+
+properties :: [Predicate Thing]
+properties = [isBlue, isOrange, isSquare, isCircle, isBig, isSmall, hasOutline, noHasOutline]
+
+propertiesOf :: Thing -> [Predicate Thing]
+propertiesOf x = [property | property <- properties, property x]
+
+isPropertyOfAnotherThing :: Predicate Thing -> Thing -> Bool
+isPropertyOfAnotherThing p x = or [p thing | thing <- things, thing /= x]
+
+propertiesOnlyOf :: Thing -> [Predicate Thing]
+propertiesOnlyOf x = [property | property <- properties, not (isPropertyOfAnotherThing property x)]
+
+rank :: Thing -> Int
+rank x = length (propertiesOnlyOf x)
+
+rankList :: [(Thing, Int)]
+rankList = [(thing, rank thing) | thing <- things]
+-- A stands out as it has zero unique properties!
