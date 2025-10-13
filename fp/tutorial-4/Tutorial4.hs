@@ -3,9 +3,6 @@ module Tutorial4 where
 import Data.Char
 import Data.List
 import Test.QuickCheck
-import Data.Ratio
-import GHC.Real (FractionalExponentBase(Base10))
-import GHC.Natural (minusNaturalMaybe)
 
 
 -- 1. doubles
