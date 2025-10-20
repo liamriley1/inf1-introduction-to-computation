@@ -5,7 +5,6 @@ module ClassExam where
 
 import Data.Char
 import Test.QuickCheck
-import GHC.Real (FractionalExponentBase(Base10))
 
 -- Problem 1
 
