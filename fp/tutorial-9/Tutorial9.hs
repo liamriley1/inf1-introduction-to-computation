@@ -166,11 +166,11 @@ Puzzles "easy" and "medium" can be solved using this method, whilst "hard" canno
 
 -- 5.
 failed :: Matrix [Digit] -> Bool
-failed = undefined
+failed mat = or [cell == [] | row <- mat, cell <- row ]
 
 -- 6.
 solved :: Matrix [Digit] -> Bool
-solved = undefined
+solved mat = and [ length cell == 1 | row <-  mat, cell <- row ]
 
 -- 7.
 shortest :: Matrix [Digit] -> Int
