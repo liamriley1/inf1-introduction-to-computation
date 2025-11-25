@@ -56,9 +56,8 @@ instance Arbitrary Prop where
                | otherwise = oneof [ liftM Not p2
                                    , liftM2 (:||:) p2 p2
                                    , liftM2 (:&&:) p2 p2
-                                   -- UNCOMMENT THESE ONCE DOING THE OPTIONAL PART!
-                                   --, liftM2 (:->:) p2 p2
-                                   --, liftM2 (:<->:) p2 p2
+                                   , liftM2 (:->:) p2 p2
+                                   , liftM2 (:<->:) p2 p2
                                   ]
                where
                  p2  =  prop (n `div` 4)

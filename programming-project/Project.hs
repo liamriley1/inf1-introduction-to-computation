@@ -21,8 +21,12 @@ simplify sequent =
                     Just [seq] -> simplify seq
                     Nothing -> case notRight sequent of
                         Just [seq] -> simplify seq
-                        -- This is the only exit point, therefore we only need to dedupe here...
-                        Nothing -> dedupe sequent
+                        Nothing -> case impRight sequent of
+                            Just [seq] -> simplify seq
+                            Nothing -> case biImpLeft sequent of
+                                Just [seq] -> simplify seq
+                                -- This is the only exit point, therefore we only need to dedupe here...
+                                Nothing -> dedupe sequent
 
 -- This function de-duplicates the lists of antecedents and succedents in a sequent
 -- Note: we also need to remove duplicate sequents themselves, this will be handled elsewhere...
@@ -50,7 +54,11 @@ flow sequent =
             Just sequents -> Just sequents
             Nothing -> case andRight sequent of
                 Just sequents -> Just sequents
-                Nothing -> Nothing
+                Nothing -> case impLeft sequent of
+                    Just sequents -> Just sequents
+                    Nothing -> case biImpRight sequent of
+                        Just sequents -> Just sequents
+                        Nothing -> Nothing
 
 
 -- Defining the rules for the simplification below here
@@ -145,20 +153,68 @@ andRight (ants :|=: sucs)
             simplifiableSuc _ = False
             (before :&&: after)  = prop
             remainingSucs = sucs \\ [prop]
+-- branching
+impLeft :: SequentRule
+impLeft (ants :|=: sucs)
+            | null simplifiableAnts = Nothing
+            | otherwise = Just [(remainingAnts :|=: a:sucs), (b:remainingAnts :|=: sucs)]
+        where
+            simplifiableAnts :: [Prop]
+            simplifiableAnts = [pickedAnt | pickedAnt <- ants, simplifiableAnt pickedAnt]
+            prop:rest = simplifiableAnts
+            simplifiableAnt :: Prop -> Bool
+            simplifiableAnt (_ :->: _) = True
+            simplifiableAnt _ = False
+            (a :->: b) = prop
+            remainingAnts = ants \\ [prop]
+
+
+-- non-branching
+impRight :: SequentRule
+impRight (ants :|=: sucs)
+            | null simplifiableSucs = Nothing
+            | otherwise = Just [((a:ants) :|=: (b:remainingSucs))]
+        where
+            simplifiableSucs :: [Prop]
+            simplifiableSucs = [pickedSuc | pickedSuc <- sucs, simplifiableSuc pickedSuc]
+            prop:rest = simplifiableSucs
+            simplifiableSuc :: Prop -> Bool
+            simplifiableSuc (_ :->: _) = True
+            simplifiableSuc _ = False
+            (a :->: b) = prop
+            remainingSucs = sucs \\ [prop]
+
+-- non-branching
+biImpLeft :: SequentRule
+biImpLeft (ants :|=: sucs)
+            | null simplifiableAnts = Nothing
+            | otherwise = Just [( ((a:->:b):(b:->:a):remainingAnts) :|=: sucs )]
+        where
+            simplifiableAnts :: [Prop]
+            simplifiableAnts = [pickedAnt | pickedAnt <- ants, simplifiableAnt pickedAnt]
+            prop:rest = simplifiableAnts
+            simplifiableAnt :: Prop -> Bool
+            simplifiableAnt (_ :<->: _) = True
+            simplifiableAnt _ = False
+            (a :<->: b) = prop
+            remainingAnts = ants \\ [prop]
+
+-- branching
+biImpRight :: SequentRule
+biImpRight (ants :|=: sucs)
+            | null simplifiableSucs = Nothing
+            | otherwise = Just [( ants :|=: (a:->:b):remainingSucs ),( ants :|=: (b:->:a):remainingSucs )]
+        where
+            simplifiableSucs :: [Prop]
+            simplifiableSucs = [pickedSuc | pickedSuc <- sucs, simplifiableSuc pickedSuc]
+            prop:rest = simplifiableSucs
+            simplifiableSuc :: Prop -> Bool
+            simplifiableSuc (_ :<->: _) = True
+            simplifiableSuc _ = False
+            (a :<->: b) = prop
+            remainingSucs = sucs \\ [prop]
 
 -- for challenge part
 
 proveCount :: Sequent -> ([Sequent],Int)
 proveCount = undefined
-
-problem = [ (Var "f" :||: Var "a") :&&: Not (Var "f")
-          , (Var "a" :||: Var "a") :&&: (Var "c" :||: Var "b")
-          , Not (Var "a") :||: Not (Var "c")
-          , Not (Var "d") :||: (Var "a" :||: Var "d")
-          ]
-          :|=:
-          [ (Var "f" :&&: Var "d") :||: (Var "d" :||: Var "d")
-          , (Var "c" :||: Var "e") :||: (Var "d" :||: Var "e")
-          , (Var "b" :||: Var "a") :&&: (Var "f" :||: Var "e")
-          ]
-
