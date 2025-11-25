@@ -1,0 +1,39 @@
+We now have the full set of 7 possible simplification operations...
+
+Let's write a subfunction called simplify which calls all the simplification rules in turn until the sequent is not changed any more.
+
+simplify seq =
+    case immediateSec of
+        Just s -> simplify s
+        Nothing -> case
+
+Then our process is:
+1. Simplify until the sequent does not change anymore
+2. Try "or left" rule
+3. If nothing is returned, try the "and right" rule
+4. If nothing is returned, the sequent is as broken down as can be
+5. If something is returned for either of the rules, go back to step one for all of the possible returned sequents
+
+## 1 point
+prove ([] :|=: [(Var "a" :||: Var "b")])
+
+prove ( [(Var "a" :||: Var "b")] :|=: [])
+
+prove ([] :|=: [Var "a" :&&: Var "b"] )
+
+prove ([Var "a" :&&: Var "b"] :|=: [] )
+
+prove ([] :|=: [Not (Var "a")] )
+
+prove ([Not (Var "a")] :|=: [] )
+
+prove ([Var "a", Var "b"] :|=: [Var "b", Var "c"] )
+
+## 2 points
+prove ([] :|=: [Not(Var "e" :&&: ( Var "f" :&&: Not(Not(Var "c")) )  ) :||: (Not(Var "a") :||: Var "c")] )
+
+
+## 3 points
+prove ([] :|=: [( (Not(Var "a") :||: Var "b") :&&: Not(Var "a")) :||: Var "a"])
+
+prove ([] :|=: [Not( ((Not(Var "a") :||: Var "b") :&&: (Not(Var "c") :||: Var "b")) ) :||: Not(Var "a") :||: Var "c"])
